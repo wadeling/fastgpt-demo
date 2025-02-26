@@ -5,7 +5,7 @@ import json
 
 # 定义API的URL和认证令牌
 api_url = 'https://cloud.fastgpt.cn/api/v1/chat/completions'
-auth_token = 'fastgpt-hGfE8rLJhyQV1SJF5TaJgz2W4zXI2ZAdqwpX3kDn7ID3dUMQ15Wj6m5ZpfkN'
+auth_token = ''
 
 # 定义CSV文件路径
 test_csv_file_path = 'plugin.csv'
