@@ -12,7 +12,7 @@ auth_token_file = './pci_app_key'
 test_csv_file_path = 'plugin.csv'
 out_csv_file_path = 'plugin_with_pci_qwen_2-5.csv'
 
-concurrent_num = 1
+concurrent_num = 20
 
 def read_token_file(file_path):
     """从指定的文件中读取内容并返回。"""
