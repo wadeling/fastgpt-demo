@@ -4,13 +4,18 @@ import time
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+# framework
+framework = 'cis'
+new_csv_field_name = f'{framework}Standard'
+
+
 # 定义API的URL和认证令牌
 api_url = 'https://cloud.fastgpt.cn/api/v1/chat/completions'
-auth_token_file = './pci_app_key'
+auth_token_file = f'{framework}_app_key'
 
 # 定义CSV文件路径
-test_csv_file_path = 'plugin.csv'
-out_csv_file_path = 'plugin_with_pci_qwen_2-5.csv'
+test_csv_file_path = 'plugin_with_cis_failed_2.csv'
+out_csv_file_path = f'plugin_with_{framework}_deepseek_reasoner.csv'
 
 concurrent_num = 20
 
@@ -68,8 +73,8 @@ def process_row(row, auth_token):
     description = row['description']
 
     prompt = sanitize_input(
-        f"一个检测项内容为：{name} {rules} {cloud_platform} {scan_type} {description} {content_description},"
-        f"请参考知识库，判断这个云服务配置检测项属于哪些 PCI 标准（格式为：PCI DSS v a.b-x.y.z）,按这个格式返回: 所属标准 - 理由."
+        f"云服务检测项内容为：{cloud_platform} {name} {rules} {description},"
+        f"最匹配哪个CIS Controls v8的requirements."
     )
 
     #print(f"Sending prompt: {prompt}")  # Log the prompt   
@@ -89,7 +94,7 @@ def read_file(csv_file_path, auth_token):
     """读取CSV文件并处理数据。"""
     with open(csv_file_path, mode='r', encoding='utf-8') as file:
         csv_reader = csv.DictReader(file, delimiter=',')
-        fieldnames = csv_reader.fieldnames + ['pciStandard']
+        fieldnames = csv_reader.fieldnames + [new_csv_field_name]
 
         with open(out_csv_file_path, mode='w', newline='', encoding='utf-8') as out_file:
             writer = csv.DictWriter(out_file, fieldnames=fieldnames, delimiter=',')
@@ -105,7 +110,7 @@ def read_file(csv_file_path, auth_token):
                             name, result = future.result()
                             print(f"处理完成: {name} - 结果: {result}")
                             row_result = futures[future]
-                            row_result['pciStandard'] = result
+                            row_result[new_csv_field_name] = result
                             writer.writerow(row_result)
                     rows = []  # 清空已处理的行
 
@@ -117,7 +122,7 @@ def read_file(csv_file_path, auth_token):
                         name, result = future.result()
                         print(f"处理完成: {name} - 结果: {result}")
                         row_result = futures[future]
-                        row_result['pciStandard'] = result
+                        row_result[new_csv_field_name] = result
                         writer.writerow(row_result)
 
 # 示例调用
