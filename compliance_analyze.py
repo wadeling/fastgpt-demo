@@ -12,9 +12,9 @@ FRAMEWORK = 'cis'
 NEW_CSV_FIELD_NAME = f'{FRAMEWORK}{SPECIFY_CLOUD_PLATFORM}Standard'
 API_URL = 'https://cloud.fastgpt.cn/api/v1/chat/completions'
 AUTH_TOKEN_FILE = f'{FRAMEWORK}_app_key'
-INPUT_CSV = 'plugin.csv'
+INPUT_CSV = 'plugin_ali_empty.csv'
 OUTPUT_CSV = f'plugin_with_{FRAMEWORK}_{SPECIFY_CLOUD_PLATFORM}_deepseek_reasoner.csv'
-CONCURRENT_NUM = 20
+CONCURRENT_NUM = 1
 MAX_RETRIES = 3
 REQUEST_TIMEOUT = 600
 REQUIRED_FIELDS = ['name', '扫描项', 'rules', '云平台', '扫描类型', '内容描述', 'description']
@@ -91,7 +91,8 @@ def process_row(row: dict, auth_token: str) -> tuple:
             f"最匹配哪个CIS_Alibaba_Cloud_Foundation_Benchmark v1的推荐项？"
             f"要求云产品必须属于{row['扫描类型']}，无匹配则返回'无对应云服务产品'"
         )
-        
+            
+        print(f"promt: {row['name']}, {prompt}")
         response = send_chat_request(row['name'], auth_token, prompt)
         
         if not isinstance(response, dict) or 'choices' not in response:
@@ -101,6 +102,7 @@ def process_row(row: dict, auth_token: str) -> tuple:
             return row['name'], "无返回结果"
             
         content = response['choices'][0].get('message', {}).get('content', '')
+        print(f"处理成功 [{row['name']}]: {response}")
         return row['name'], content.replace("'", '"').strip()
     
     except Exception as e:
