@@ -7,16 +7,17 @@ from concurrent.futures import ThreadPoolExecutor
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 # 配置参数
-SPECIFY_CLOUD_PLATFORM = 'ali'
-FRAMEWORK = 'cis'
+SPECIFY_CLOUD_PLATFORM = ''
+FRAMEWORK = 'hipaa'
 NEW_CSV_FIELD_NAME = f'{FRAMEWORK}{SPECIFY_CLOUD_PLATFORM}Standard'
-API_URL = 'https://cloud.fastgpt.cn/api/v1/chat/completions'
+#API_URL = 'https://cloud.fastgpt.cn/api/v1/chat/completions'
+API_URL = 'http://ubuntu.orb.local:3000/api/v1/chat/completions'
 AUTH_TOKEN_FILE = f'{FRAMEWORK}_app_key'
-INPUT_CSV = 'plugin_ali_empty.csv'
+INPUT_CSV = 'plugin_empty_hipaa.csv'
 OUTPUT_CSV = f'plugin_with_{FRAMEWORK}_{SPECIFY_CLOUD_PLATFORM}_deepseek_reasoner.csv'
-CONCURRENT_NUM = 1
+CONCURRENT_NUM = 10
 MAX_RETRIES = 3
-REQUEST_TIMEOUT = 600
+REQUEST_TIMEOUT = 300
 REQUIRED_FIELDS = ['name', '扫描项', 'rules', '云平台', '扫描类型', '内容描述', 'description']
 
 class APIRequestError(Exception):
@@ -76,7 +77,7 @@ def validate_row(row: dict):
     if missing_fields:
         raise ValueError(f"缺少必要字段: {missing_fields}")
     
-    if row['云平台'].lower() != SPECIFY_CLOUD_PLATFORM.lower():
+    if SPECIFY_CLOUD_PLATFORM and row['云平台'].lower() != SPECIFY_CLOUD_PLATFORM.lower():
         raise ValueError("云平台不匹配")
 
 def process_row(row: dict, auth_token: str) -> tuple:
@@ -88,8 +89,8 @@ def process_row(row: dict, auth_token: str) -> tuple:
         prompt = sanitize_input(
             f"云服务检测项内容: {row['云平台']} {row['name']} "
             f"{row['rules']} {row['description']}\n"
-            f"最匹配哪个CIS_Alibaba_Cloud_Foundation_Benchmark v1的推荐项？"
-            f"要求云产品必须属于{row['扫描类型']}，无匹配则返回'无对应云服务产品'"
+            f"最匹配哪条hipaa标准？"
+            #f"要求云产品必须属于{row['扫描类型']}，无匹配则返回'无对应云服务产品'"
         )
             
         print(f"promt: {row['name']}, {prompt}")
