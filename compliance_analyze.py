@@ -9,7 +9,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 # 配置参数
 SPECIFY_CLOUD_PLATFORM = ''
-FRAMEWORK = 'gdpr'
+FRAMEWORK = 'nist80053'
 NEW_CSV_FIELD_NAME = f'{FRAMEWORK}{SPECIFY_CLOUD_PLATFORM}Standard'
 #API_URL = 'https://cloud.fastgpt.cn/api/v1/chat/completions'
 API_URL = 'http://ubuntu.orb.local:3000/api/v1/chat/completions'
@@ -95,7 +95,7 @@ def process_row(row: dict, auth_token: str) -> tuple:
         prompt = sanitize_input(
             f"云服务检测项内容: {row['云平台']} {row['name']} "
             f"{row['rules']} {row['description']}\n"
-            f"最匹配哪条gdpr条款？"
+            f"最匹配nist800-53 rev5哪条controls？"
             #f"要求云产品必须属于{row['扫描类型']}，无匹配则返回'无对应云服务产品'"
         )
             
@@ -132,7 +132,7 @@ def process_batch(batch: list, auth_token: str) -> list:
 def main():
     try:
         auth_token = read_token_file(AUTH_TOKEN_FILE)
-        print("认证令牌验证成功 {auth_token}")
+        print(f"认证令牌验证成功 {auth_token}")
 
         with open(INPUT_CSV, 'r', encoding='utf-8') as f_in, \
              open(OUTPUT_CSV, 'w', newline='', encoding='utf-8') as f_out:
